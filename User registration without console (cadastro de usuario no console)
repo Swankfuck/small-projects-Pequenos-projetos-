@@ -1,0 +1,29 @@
+Interface de cadastro de usuário simples
+
+
+using System;
+using System.Dynamic;
+
+namespace AulaCebrac
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Digite seu nome");
+            string nome;
+            nome = Console.ReadLine();
+            Console.WriteLine("Digite sua idade");
+            int idade;
+            idade = int.Parse(Console.ReadLine());
+            Console.WriteLine("Digite M para masculino e F para feminino");
+            char sexo;
+            sexo = char.Parse(Console.ReadLine());
+            if (char.IsLetter('m') | char.IsLetter('F'));
+            Console.WriteLine("Seu nome é " + nome + " Sua idade é " + idade + " Seu Sexo é " + sexo);
+
+            
+
+        }
+    }
+}
