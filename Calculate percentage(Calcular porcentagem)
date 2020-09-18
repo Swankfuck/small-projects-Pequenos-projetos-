@@ -1,0 +1,93 @@
+Criando um encapusulamento para criação de um calculo com porcentagem
+exemplo 100 + 5%
+
+(3 RadiosButton, 1 TextBox, 1 Button)
+(Alterar o checked do radionbutton para true nas properties)
+
+>>>>>cmd_executar<<<<<
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Encapsulamento
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void cmd_executar_Click(object sender, EventArgs e)
+        {
+            //Calculo para ver quando fica o valor do produto final com 5% de acrescimo. Exemplo =  100 reais mais 5% ou 12% ou 23%
+            //apresentar o preço final do produto
+            cl_calculo calculadora = new cl_calculo();
+
+            int preco_inicial = Convert.ToInt16(caixa_preco.Text); // Convert.Toint16 = converter um texto para um valor numerico de 16 bits
+            int tipo_produto = 0;
+            if (btn_copo.Checked)
+                tipo_produto = 1;
+            else if (btn_martelo.Checked)
+                tipo_produto = 2;
+            else if (btn_perfume.Checked)
+                tipo_produto = 3;
+            //ao criar esse if else /\ veja que o tipo_produto tem que ser colocado aqui dentro \/
+
+            MessageBox.Show("Preço final = " + calculadora.CalcularPrecoFinal(preco_inicial, tipo_produto));
+        }
+    }
+}
+
+>>>>>cl_calculo<<<<<
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Encapsulamento
+{
+    class cl_calculo
+    {
+        //Porcentagem cobrada para o valor1(copo de leite) o valor2(Martelo) e o valor3(Perfume)
+        private int porcetagem1 = 5; //5% a mais para o Copo de leite
+        private int porcentagem2 = 12; //12% a mais para o Martelo
+        private int porcentagem3 = 23; //23% a mais para o Perfume
+
+        //metodo que vai ser mostrado para criar objeto dessa classe
+        public int CalcularPrecoFinal(int preco_inicial, int tipo_produto)
+        {
+            int preco_final = 0;
+
+            //calculo do preco_final
+            switch (tipo_produto)
+            {
+                //Copo de leite
+                case 1:
+                    preco_final = preco_inicial + (preco_inicial * porcetagem1 / 100);
+                    break;
+
+                //Martelo
+                case 2:
+                    preco_final = preco_inicial + (preco_inicial * porcentagem2 / 100);
+                    break;
+
+                //Perfume
+                case 3:
+                    preco_final = preco_inicial + (preco_inicial * porcentagem3 / 100);
+                    break;
+            }
+
+            return preco_final;
+
+        }
+    }
+}
