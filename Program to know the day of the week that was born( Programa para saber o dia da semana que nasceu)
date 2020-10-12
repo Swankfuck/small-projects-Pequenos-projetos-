@@ -1,0 +1,23 @@
+4 label (dia, mes, ano e a label para o resultado)
+3 TextBox (para inserir as datas)
+1 botão (para executar)
+
+
+
+            
+        
+        private void button1_Click(object sender, EventArgs e)
+        {
+            int dia = int.Parse(textBox1.Text); // Parse converte uma string em um valor inteiro (para inserir a data)
+            int mes = int.Parse(textBox2.Text);
+            int ano = int.Parse(textBox3.Text);
+
+            DateTime data = new DateTime(ano, mes, dia);
+            label4.Text = "I was born in a " + data.DayOfWeek;
+
+            // olha só que interessante aqui eu criei uma tabela que eu coloco as datas e aperto o botão para executar
+            // o resultado vai ser o dia "segunda, terça etc..." que eu nasci 
+;        }
+
+
+Obs: vai aparecer o dia em ingles !! 
