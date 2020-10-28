@@ -1,0 +1,135 @@
+Form1 = alterar a FormBorderStyle para ele ficar do tamanho que voce colocar "pequeno" sem os botoes pra maximiza ou minimizar
+
+textbox = alterar a TabIndex para a digitação iniciar automaticamente na caixa de texto
+outra maneira de corrigir a opção a cima é clicando em "exibir" e clicar na "ordem da tabulação" e clicando em cima dos numeros que aparecer podemos fazer a ordem certa ! 
+
+textbox = Maxlenght para limitar o numero de caracter na textbox ! 
+
+KeyDown = esta nos eventos, clicando na textbox va em eventos e clique 2x na KeyDown para programar o enter "Ao clicar no enter a operação vai ser feita"  
+
+
+Para ver possiveis bugs clique na linha de codigo que nao esta dando certo e aperte f9 o "breakpoint"
+em seguida coloque o mouse em cima da linha e olha o valor deles que vai aparecer clicando na lupinha
+vai aparecer uma janela revelando a string que foi realizada a operação
+em seguida aperte f11 para ir para segunda linha para executar a anterior e voce poder voltar e ver outros possiveis erros
+
+
+
+usado
+2 botões, 1textbox, 1label
+
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace Calculadora
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+        }
+
+        private void btn_sair_Click(object sender, EventArgs e)
+        {
+            //fechar a aplicação
+            Application.Exit();
+        }
+
+        private void btn_calcular_Click(object sender, EventArgs e)
+        {
+            //executa o calculo da operação
+            int parcela1;
+            int parcela2;
+            string tipo_operacao;
+
+            int resultado = -11111111; // resultado final
+                
+
+            string algoritimo = text_operacao.Text;
+
+            string sinais = "+-*/";
+            int index = 0; // precisamos por um indice então colocamos o 0 pois ele vai começar pelo [0][1][2]....
+            foreach (char c in algoritimo) // ao descobrir a posição do sinal com esse código abaixo ele ja vai determinar qual é a parcela1 e a parcela2
+            {
+                foreach (char s in sinais)
+                {
+                    if(c == s )
+                    {
+                        //define os primeiros numeros da conta exemplo "123"
+                        parcela1 = int.Parse(algoritimo.Substring(0, index));
+
+                        // MessageBox.Show(parcela1.ToString()); // para testa se deu certo
+
+                        //sinal
+                        tipo_operacao = c.ToString(); //lembrando que "c" é char e precisa por ToString
+                        parcela2 = int.Parse(algoritimo.Substring(index + 1)); //index+1 = desde o local onde ta o sinal;
+
+                        //analisa o tipo de sinal que foi introduzido
+                        switch (tipo_operacao)
+                        {
+                            case "+":
+                                resultado = parcela1 + parcela2;
+                              break;
+
+                            case "-":
+                                resultado = parcela1 - parcela2;
+                                break;
+
+                            case "*":
+                                resultado = parcela1 * parcela2;
+                                break;
+
+                            case "/":
+                                resultado = parcela1 / parcela2;
+                                break;
+                        }
+                        break;
+                    }
+                }
+                if (resultado != -11111111)
+                    break;
+              
+                index++; // para sempre avançar uma unidade
+            }
+            //apresentação do resultado final
+            if (resultado == -11111111)
+            {
+                MessageBox.Show("Erro na operação");
+            }
+            else
+            {
+                MessageBox.Show(resultado.ToString());
+            }
+
+            //limpa a caixa de texto para escrever um novo
+            text_operacao.Text = "";
+            text_operacao.Focus();
+        }
+
+        private void text_operacao_KeyDown(object sender, KeyEventArgs e)
+        {
+            //para quando colocar o calculo e apertar o ENTER ele fazer a operação
+            
+            //verifica se existe texto (se não tiver não faz nada)
+            if (text_operacao.Text == "") return;
+
+            //verifica se tem texto e se a tecla foi pressionada (se tiver executa o código abaixo)
+            if (e.KeyCode == Keys.Return) //se e.keycode(a tecla foi pressionada) for igual == keys.return(tecla enter)
+                btn_calcular_Click(btn_calcular, EventArgs.Empty);
+            else if(e.KeyCode == Keys.Back)
+            {
+                text_operacao.Text = "";
+                text_operacao.Focus();
+            }
+        }       
+    }
+}
