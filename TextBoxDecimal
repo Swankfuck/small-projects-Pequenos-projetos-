@@ -1,0 +1,345 @@
+o pequeno projeto a seguri realiza a seguinte função:
+* Criação de uma TextBox que aceite valores decimais
+* imagine que vou realizar uma tarefa com dinheiro, ela é uma exelente escolha
+* pois ela segue um padrao global de PONTO e VIRGULA (um campo nas propriedade foi feito justamente para isso)
+* ao sair da textbox o valor se adapta para ficar correto (com casas decimais corretas e arredondamento de valores)
+* com o sistema ascii table incluimos apenas numeros e alguns simbolos aceito na textbox
+
+
+
+(foi criada uma classe especialmente para ser feito esse controle)
+(e ao ir na caixa de ferramentas nossa textbox modificada aprece em primeiro)
+ - Segue abaixo o codigo criado na classe !
+
+//=============================================================
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;//*colocar esse using
+
+namespace UserControlCaixaTextoNumerico
+{
+
+    //*aqui vamos criar nossa textbox de numeros decimais
+    //*ou seja ela só vai aceitar numero decimal
+    //*ela vai controlar os erros de utilização e corrigi-los   
+
+
+    class TextDecimal : TextBox //*Colocar : TextBox(vai herdar as caracteristicas de uma textbox)
+    {
+        //*na caixa de ferramentas vai aparecer TextDecilmal (como aparece ao fazer download do bunifu)
+
+        public enum EnumSeparador
+        {
+            //*criando um separador nas propriedades ("." ou ",")
+            //*enumeração da virgula e do ponto
+            Virgula,
+            Ponto
+        }
+
+        #region criando as propriedades
+        private double _MinValor = 0;
+        private double _MaxValor = 100;
+        private bool _PermitirDecimais = true;
+        private int _NumeroCasasDecimais = 2;
+        private double _ValorDefeito = 0;
+        private EnumSeparador _Separador = EnumSeparador.Virgula;
+        #endregion
+
+
+        //*GET = vai pegar o valor que esta nas variaveis acima /\
+        //*SET = a hora que alterar o valor nas propriedades automaticamente sera alterado na textbox(por causa do value)
+
+        #region permitir alterar os valores nas propriedades
+        public double ValorMinimo
+        {
+            get { return _MinValor; }
+            set { _MinValor = value; }
+        }
+
+        public double ValorMaximo
+        {
+            get { return _MaxValor; }
+            set { _MaxValor = value; }
+        }
+
+        public bool PermitirDecimais
+        {
+            get { return _PermitirDecimais; }
+            set { _PermitirDecimais = value; }
+        }
+
+        public int CasasDecimais
+        {
+            get { return _NumeroCasasDecimais; }
+            set { _NumeroCasasDecimais = value; }
+        }
+
+        public double ValorPorDefeito
+        {
+            get { return _ValorDefeito; }
+            set { _ValorDefeito = value; }
+        }
+
+        //*define o tipo de separador decimal
+        public EnumSeparador SeparadorDecimal
+        {
+            get { return _Separador; }
+            set { _Separador = value; }
+        }
+        #endregion
+
+        //=======================================
+        //*criando um construtor para criar eventos
+        public TextDecimal()
+        {
+            //*eventos do contole caixa de texto
+            this.KeyPress += TextDecimal_KeyPress; //*quando criar um evento ao colocar this.KeyPress += aperte o Tab após o = que ele cria o resto sozinho
+            this.LostFocus += TextDecimal_LostFocus;
+            this.TextChanged += TextDecimal_TextChanged;
+        }
+        //=======================================
+        private void TextDecimal_TextChanged(object sender, EventArgs e)
+        {
+            //*acontece quando o valor apresentado na textbox é alterado ou atribuimos um valor diferente
+            if (this.Focused) return;
+            if (this.Text == "") return;
+
+            //*verifica se o valor atribuido a textbox esta dentro do limite
+            try
+            {
+                double valor = double.Parse(this.Text); //*transforma o texto em um valor double
+                
+                //*verifica se o valor é inferior ao minimo
+                if(valor < _MinValor)
+                {
+                    valor = _MinValor;
+                    this.Text = valor.ToString();
+                    TextDecimal_LostFocus(this, EventArgs.Empty); //*coloque TextDecimal_ (após o _ aperte CTRL e ESPAÇO que ele mostra as opções)
+                    return;
+                }
+
+                //*verifica se o valor é maior ao maximo
+                if(valor > _MaxValor)
+                {
+                    valor = _MaxValor;
+                    this.Text = valor.ToString();
+                    TextDecimal_LostFocus(this, EventArgs.Empty);
+                    return;
+                }
+
+            }
+            catch
+            {
+                this.Text = _ValorDefeito.ToString();
+                TextDecimal_LostFocus(this, EventArgs.Empty);
+            }
+
+        }
+
+        //=======================================
+        private void TextDecimal_LostFocus(object sender, EventArgs e)
+        {
+            //*executar operações quando a caixa perde o focus(quando o cursor sai dela)
+            if (this.Text == "") return;
+
+            //-------------------------
+            #region verifica qual é o separador (virgula ou ponto)
+            char separador = ',';
+            if (_Separador == EnumSeparador.Ponto) separador = '.';
+            #endregion
+
+            //-------------------------
+            #region substitui o separador, caso ele exista na textbox e seja diferente do selecionado
+            //*imagine que colocou o valor decimal e colocou um "." mas o valor que tinha escolido era a virgula ele vai analizar essa circunstancia
+            if(separador == ',')
+                this.Text = this.Text.Replace('.', ','); //*se o separador selecionado foi uma virgula, e ele encontra dentro do texto um ponto, ele automaticamente vai subistituir(replace) todos os ponto por virgulas
+            
+            else            
+                this.Text = this.Text.Replace(',', '.');//*caso for virgulas vao passar para pontos.
+            #endregion
+
+            //-------------------------
+            #region se o valor inserido for apenas um separador
+            //*imagine que o usuario colocou apenas um ponto ou uma virtula(nao colocou numeros)
+            if(this.Text == separador.ToString())
+            {
+                if (_PermitirDecimais)
+                    this.Text = _ValorDefeito.ToString(); //*o valorDefeito(valorPorDefeito) é 0 como padrão (se nao colocar numeros ele é acionado)
+            }
+            #endregion
+
+            //-------------------------
+            #region no caso de ter casas decimais, verifica se estão corretas
+            //*se eu tenho 3 casas decimais quero saber se o usuario colocou 4 ou 5 casas decimais e controlar isso
+            if(_PermitirDecimais && this.Text.Contains(separador))
+            {
+                //*verifica se o numero de casas decimais não é valido
+                string[] valores = this.Text.Split(separador);
+
+                //*verifica se o numero de casas decimais é inferior ao definido (se eu definir 2 casas decimais e coloquei apenas 1 casa decimal)
+                //*ou seja se faltar valor decimal
+                if(valores[1].Length < _NumeroCasasDecimais)
+                {
+                    int FaltaDecimal = _NumeroCasasDecimais - valores[1].Length;
+                    valores[1] = valores[1] + new string('0', FaltaDecimal); //*acrescenta até dois 0
+                    this.Text = valores[0] + separador + valores[1]; //*reconstroi com os decimais corretos
+                    /*exeplicando
+                     * se eu tenho 2 casas decimais e eu escrevo 23,1(falta 1 valor decimal)
+                     * esse mecanismo acima vai acrescentar um 0
+                     * 
+                     * caso eu tenho 4 casas decimais e escrevo 23,15(falta 2 valor decimal)
+                     * esse mecanismo acima vai acrescentrar dois 0
+                     */              
+                }
+
+                //*se o numero de casas decimais é maior que ao definido
+                /*por exemplo se tenho 2 casas decimais e defino 4 ele vai arredondar o valor
+                 * exemplo se eu tiver 23,45678 e tiver apenas 2 casas decimais, vai transformar esse numero em 23,46
+                 */
+                if(valores[1].Length > _NumeroCasasDecimais)
+                {
+                    double resultado = Math.Round(double.Parse(this.Text), _NumeroCasasDecimais);
+                    this.Text = resultado.ToString();
+                }
+
+            
+            }
+
+            #endregion
+
+            //-------------------------
+            #region se o texto introduzido começar por sinal negativo, mas contem logo de imediado o separador
+            /* exemplo
+             * -,151515 ou -.1515515
+             */
+
+            if(this.Text.Contains('-'))
+            {
+                int localizacao = this.Text.IndexOf('-'); //*procura aonde o '-' esta ou seja o indice do '-' (localização em termos de indice)
+                if(localizacao !=0) //*caso o '-' não for logo no inicio vai colocar o texto com o valor 0
+                    this.Text = "0";
+                
+            }
+
+            #endregion
+
+            //-------------------------
+            #region transformar o valor que foi inserido em um valor double
+            double valor = double.Parse(this.Text); //*se o valor aqui for valido
+            this.Text = valor.ToString(); //*ele passa para o texto(textbox)
+
+            #endregion
+
+            //-------------------------
+            #region verifica se foi respeitado o limite minimo e maximo
+            if(valor < _MinValor) //*se eu coloco -1 e saio da textbox ela vai automaticamente aderir o valor 0 (caso o minimo for 0)
+            {
+                this.Text = _MinValor.ToString();
+                TextDecimal_LostFocus(this, EventArgs.Empty);
+            }
+            if(valor > _MaxValor) //*se eu coloco 101 e saio da textbox ele vai automaticamente aderir o valor 100 (caso o maximo for 100)
+            {
+                this.Text = _MaxValor.ToString();
+                TextDecimal_LostFocus(this, EventArgs.Empty);
+            }
+            #endregion
+        }
+        //=======================================
+        private void TextDecimal_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            //*executar operaçoes quando o utilizador pressiona teclas (não permite letra ou não permite numero)
+            //MessageBox.Show("tecla pressionada");
+
+            //-------------------------
+            #region Teclas Permitidas
+            //*teclas permitidas (ascii table pesquisar por isso, mostra o codigo numerico de cada tecla)
+            //*esses numeros foram tirado do "ascii table" aonde cada numero corresponde a uma tecla do teclado
+            int[] codigosTeclas;
+            if (_PermitirDecimais)
+                codigosTeclas = new int[] { 44, 45, 46, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 8 };
+            else
+                codigosTeclas = new int[] { 45, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 8 };
+            #endregion
+
+            //-------------------------
+            #region verifica se o caracter é valido
+            //*aqui que ele vai tratar de deixar ou nao que o caracter seja introduzido
+            if(!codigosTeclas.Contains(e.KeyChar)) //*se o codigosTeclas não contem a tecla pressionada com o e.keychar
+            {
+                e.Handled = true; //*a tecla foi pressionada mais nao vamos considerar que a tecla foi pressionada(nao vai ser colocada no texto "handle")
+                return;
+            }
+            #endregion
+
+            //-------------------------
+            #region verifica o separador
+            //*veririca se esta colocando o separador decimal correto
+            if(_PermitirDecimais)
+            {
+                char valido = ',';
+                char invalido = '.';
+
+                if(_Separador == EnumSeparador.Ponto)
+                {
+                    valido = '.';
+                    invalido = ',';
+                }
+
+                //*verifica se pode ser inserido o separador
+                if(e.KeyChar == valido || e.KeyChar == invalido)
+                {
+                    if(this.Text.Contains(valido)) //*se eu tentar colocar uma ',' quando ja tem uma ',' ele não vai permitir
+                    {
+                        e.Handled = true;
+                        return;
+                    }
+
+                    //*verifica se é necessario substituir o separador
+                    if (e.KeyChar == invalido)
+                        e.KeyChar = valido;
+                }
+
+
+            }
+            #endregion
+
+            //-------------------------
+            #region verifica se esta tentando colocar dois sinais de "-" (ou seja --)
+            //*verifica se esta tentando colocar um segundo sinal negativo(--)
+            if(this.Text.Contains('-') && e.KeyChar == '-')
+            {
+                e.Handled = true;
+                return;
+            }
+            #endregion
+
+            //-------------------------
+            #region verifica se esta tentando colocar um sinal negativo "-" apos separador
+            //*verifica se o usuario tenta colocar o seguinte valor 15145,126-1551
+            //*uma virgula dentro do numero
+
+            char CharValido = _Separador == EnumSeparador.Virgula ? ',' : '.'; //*? =operador ternario
+            //*charvalido separador ser igual enumseparador virgua vai ser igual virgula se nao vai ser igual ponto
+            if(this.Text.Contains(CharValido))
+            {
+                if (this.Text.IndexOf(CharValido) < this.SelectionStart && e.KeyChar == '-') //*selectionstart = inicio
+                {
+                    e.Handled = true;
+                    return;
+                }
+            }
+
+            //*esse codigo abaixo é a mesma coisa que o codigo acima "char CharValido = _Separador == EnumSeparador.Virgula ? ',' : '.';"
+            //if (_Separador == EnumSeparador.Ponto)
+            //CharValido = '.';
+            //else
+            //CharValido = ',';
+            #endregion
+
+        }
+    }
+}
